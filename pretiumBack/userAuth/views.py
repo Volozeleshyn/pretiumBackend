@@ -4,6 +4,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login, logout
 from django.contrib.auth import authenticate
+from django.db.utils import IntegrityError
+from . import helper
 
 from rest_framework import status
 
@@ -43,13 +45,21 @@ def signup(request):
     elif models.User.objects.filter(email=request.POST['email']).exists():
         return HttpResponse(status=405)
     else:
-        u = models.User(username=request.POST['username'], email=request.POST['email'],
-                        fullname=request.POST['fullname'])
-        u.set_password(request.POST['password'])
-        u.save()
-        login(request, u)
-        serializer = serializers.UserSerializer(u)
-        return JsonResponse(serializer.data)
+        new_hash = helper.create_hash()
+        while 1:
+            try:
+                u = models.User(username=request.POST['username'], email=request.POST['email'],
+                                       fullname=request.POST['fullname'], hash_id=new_hash)
+                u.set_password(request.POST['password'])
+                u.save()
+                login(request, u)
+                serializer = serializers.UserSerializer(u)
+                return JsonResponse(serializer.data)
+            except IntegrityError:
+                new_hash = helper.create_hash()
+                pass
+
+
 
 
 def auth_logout(request):
