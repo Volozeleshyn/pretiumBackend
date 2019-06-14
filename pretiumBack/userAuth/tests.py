@@ -6,7 +6,7 @@ from django.http import HttpRequest, QueryDict
 
 class UserAuthTestCase(TestCase):
 
-    def createModel(self):
+    def test_create_model_and_check(self):
         request = HttpRequest()
         request.method = 'POST'
         request.POST = QueryDict.__init__(request.POST, 'email=vasyapupkin1988@gmail.com&username=Vasiliy&fullname=Vasiliy Ivanovich Pupkin&password=velosiped124', True)
