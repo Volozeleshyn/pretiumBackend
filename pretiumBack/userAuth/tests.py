@@ -1,7 +1,8 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from .views import signup
 from .models import User
 from django.http import HttpRequest, QueryDict
+from django.contrib.sessions.backends.db import SessionStore
 
 
 class UserAuthTestCase(TestCase):
@@ -9,11 +10,14 @@ class UserAuthTestCase(TestCase):
     def test_create_model_and_check(self):
         request = HttpRequest()
         request.method = 'POST'
-        request.POST = QueryDict.__init__(request.POST, 'email=vasyapupkin1988@gmail.com&username=Vasiliy&fullname=Vasiliy Ivanovich Pupkin&password=velosiped124', True)
+        request.POST = QueryDict('email=vasyapupkin1988@gmail.com&username=Vasiliy&fullname=Vasiliy Ivanovich Pupkin&password=velosiped124')
+        request.session = SessionStore()
         signup(request)
-        if User.objects.filter(username='Vasiliy').exists():
-            self.assertEqual(User.objects.filter(username='Vasiliy').password, 'velosiped124')
-        elif User.objects.filter(email='vasyapupkin1988@gmail.com').exists():
-            self.assertEqual(User.objects.filter(username='Vasiliy').password, 'velosiped124')
+        user_obj1 = User.objects.get(username='Vasiliy')
+        user_obj2 = User.objects.get(email='vasyapupkin1988@gmail.com')
+        if user_obj1:
+            self.assertEqual(user_obj1.email, 'vasyapupkin1988@gmail.com')
+        elif user_obj2:
+            self.assertEqual(user_obj2.username, 'Vasiliy')
         else:
             self.assertTrue(False)
