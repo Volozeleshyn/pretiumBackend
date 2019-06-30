@@ -97,9 +97,6 @@ def get_sn_data(request):
     user_exists = models.User.objects.get(username=username)
     if user_exists:
         return HttpResponse(status=401)
-    user_exists = models.User.objects.get(hash_id='social_network')
-    if user_exists:
-        return HttpResponse(status=203)
     user = models.User(username=request.POST['username'], email=request.POST['email'],
                        fullname=request.POST['fullname'], hash_id='social_network')
     user.set_password(request.POST['password'])
