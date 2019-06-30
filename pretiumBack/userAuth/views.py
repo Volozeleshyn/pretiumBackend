@@ -48,12 +48,12 @@ def signup(request):
         new_hash = helper.create_hash()
         while 1:
             try:
-                u = models.User(username=request.POST['username'], email=request.POST['email'],
-                                fullname=request.POST['fullname'], hash_id=new_hash)
-                u.set_password(request.POST['password'])
-                u.save()
-                login(request, u)
-                serializer = serializers.UserSerializer(u)
+                user = models.User(username=request.POST['username'], email=request.POST['email'],
+                                   fullname=request.POST['fullname'], hash_id=new_hash)
+                user.set_password(request.POST['password'])
+                user.save()
+                login(request, user)
+                serializer = serializers.UserSerializer(user)
                 return JsonResponse(serializer.data)
             except IntegrityError:
                 new_hash = helper.create_hash()
@@ -82,7 +82,8 @@ def check_id(request):
     id = request.POST['id']
     user_exists = models.User.objects.get(hash_id=id)
     if user_exists:
-        return HttpResponse(user_model=user_exists)
+        serializer = serializers.UserSerializer(user_exists)
+        return JsonResponse(serializer.data)
     return HttpResponse(status=401)
 
 
@@ -96,4 +97,13 @@ def get_sn_data(request):
     user_exists = models.User.objects.get(username=username)
     if user_exists:
         return HttpResponse(status=401)
-    return HttpResponse(status=200)
+    user_exists = models.User.objects.get(hash_id='social_network')
+    if user_exists:
+        return HttpResponse(status=203)
+    user = models.User(username=request.POST['username'], email=request.POST['email'],
+                       fullname=request.POST['fullname'], hash_id='social_network')
+    user.set_password(request.POST['password'])
+    user.save()
+    login(request, user)
+    serializer = serializers.UserSerializer(user)
+    return JsonResponse(serializer.data)
