@@ -82,7 +82,9 @@ def check_id(request):
     id = request.POST['id']
     user_exists = models.User.objects.get(hash_id=id)
     if user_exists:
-        serializer = serializers.UserSerializer(user_exists)
+        user = authenticate(username=user_exists.username, password=user_exists.password)
+        login(request, user)
+        serializer = serializers.UserSerializer(user)
         return JsonResponse(serializer.data)
     return HttpResponse(status=401)
 
