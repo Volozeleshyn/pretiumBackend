@@ -49,7 +49,7 @@ def signup(request):
         while 1:
             try:
                 u = models.User(username=request.POST['username'], email=request.POST['email'],
-                                       fullname=request.POST['fullname'], hash_id=new_hash)
+                                fullname=request.POST['fullname'], hash_id=new_hash)
                 u.set_password(request.POST['password'])
                 u.save()
                 login(request, u)
@@ -60,8 +60,6 @@ def signup(request):
                 pass
 
 
-
-
 def auth_logout(request):
     logout(request)
     return HttpResponse(status=200)
@@ -69,11 +67,33 @@ def auth_logout(request):
 
 @csrf_exempt
 def change_password(request):
-    uid = request.POST['uid']
+    id = request.POST['id']
     new_password = request.POST['new_password']
-    user_exists = models.User.objects.get(uid=uid)
+    user_exists = models.User.objects.get(hash_id=id)
     if user_exists:
         user_exists.set_password(new_password)
         user_exists.save()
         return HttpResponse(status=200)
     return HttpResponse(status=401)
+
+
+@csrf_exempt
+def check_id(request):
+    id = request.POST['id']
+    user_exists = models.User.objects.get(hash_id=id)
+    if user_exists:
+        return HttpResponse(user_model=user_exists)
+    return HttpResponse(status=401)
+
+
+@csrf_exempt
+def get_sn_data(request):
+    email = request.POST['email']
+    username = request.POST['username']
+    user_exists = models.User.objects.get(email=email)
+    if user_exists:
+        return HttpResponse(status=403)
+    user_exists = models.User.objects.get(username=username)
+    if user_exists:
+        return HttpResponse(status=401)
+    return HttpResponse(status=200)
