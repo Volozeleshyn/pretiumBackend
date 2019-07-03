@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login, logout
 from django.contrib.auth import authenticate
 from django.db.utils import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import MultipleObjectsReturned
 from . import helper
 
 from rest_framework import status
@@ -29,13 +31,16 @@ def auth_login_username(request):
 def auth_login_email(request):
     email = request.POST['email']
     password = request.POST['password']
-    user_exists = models.User.objects.get(email=email)
-    if user_exists:
-        user = authenticate(username=user_exists.username, password=password)
-        login(request, user)
-        serializer = serializers.UserSerializer(user)
-        return JsonResponse(serializer.data)
-    return HttpResponse(status=401)
+    try:
+        user_exists = models.User.objects.get(email=email)
+        if user_exists:
+            user = authenticate(username=user_exists.username, password=password)
+            login(request, user)
+            serializer = serializers.UserSerializer(user)
+            return JsonResponse(serializer.data)
+    except ObjectDoesNotExist:
+        return HttpResponse(status=401)
+
 
 
 @csrf_exempt
@@ -46,6 +51,8 @@ def signup(request):
         return HttpResponse(status=405)
     else:
         new_hash = helper.create_hash()
+        while (new_hash[:2] == 'vk') or (new_hash[:2] == 'fb'):
+            new_hash = helper.create_hash()
         while 1:
             try:
                 user = models.User(username=request.POST['username'], email=request.POST['email'],
@@ -69,39 +76,41 @@ def auth_logout(request):
 def change_password(request):
     id = request.POST['id']
     new_password = request.POST['new_password']
-    user_exists = models.User.objects.get(hash_id=id)
-    if user_exists:
-        user_exists.set_password(new_password)
-        user_exists.save()
-        return HttpResponse(status=200)
-    return HttpResponse(status=401)
+    try:
+        user_exists = models.User.objects.get(hash_id=id)
+        if user_exists:
+            user_exists.set_password(new_password)
+            user_exists.save()
+            return HttpResponse(status=200)
+    except ObjectDoesNotExist:
+        return HttpResponse(status=401)
 
 
 @csrf_exempt
 def check_id(request):
     id = request.POST['id']
-    user_exists = models.User.objects.get(hash_id=id)
-    if user_exists:
-        user = authenticate(username=user_exists.username, password=user_exists.password)
-        login(request, user)
-        serializer = serializers.UserSerializer(user)
-        return JsonResponse(serializer.data)
-    return HttpResponse(status=401)
+    try:
+        user_exists = models.User.objects.get(hash_id=id)
+        if user_exists:
+            user = authenticate(username=user_exists.username, password=helper.caesar_cypher(id))
+            login(request, user)
+            serializer = serializers.UserSerializer(user)
+            return JsonResponse(serializer.data)
+    except ObjectDoesNotExist:
+        return HttpResponse(status=401)
 
 
 @csrf_exempt
 def get_sn_data(request):
     email = request.POST['email']
     username = request.POST['username']
-    user_exists = models.User.objects.get(email=email)
-    if user_exists:
+    if models.User.objects.filter(email=email).exists():
         return HttpResponse(status=403)
-    user_exists = models.User.objects.get(username=username)
-    if user_exists:
+    if models.User.objects.filter(username=username).exists():
         return HttpResponse(status=401)
     user = models.User(username=request.POST['username'], email=request.POST['email'],
-                       fullname=request.POST['fullname'], hash_id='social_network')
-    user.set_password(request.POST['password'])
+                       fullname=request.POST['fullname'], hash_id=request.POST['id'])
+    user.set_password(helper.caesar_cypher(request.POST['id']))
     user.save()
     login(request, user)
     serializer = serializers.UserSerializer(user)
