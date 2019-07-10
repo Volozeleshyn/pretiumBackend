@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'userAuth',
+    'friends',
 ]
 
 AUTH_USER_MODEL = 'userAuth.User'
