@@ -18,6 +18,7 @@ from django.urls import path
 
 from userAuth import views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/email', views.auth_login_email),
@@ -26,5 +27,6 @@ urlpatterns = [
     path('signup', views.signup),
     path('change_password', views.change_password),
     path('check_id', views.check_id),
-    path('get_sn_data', views.get_sn_data)
+    path('get_sn_data', views.get_sn_data),
+    path('get_friends', views.get_friends)
 ]
