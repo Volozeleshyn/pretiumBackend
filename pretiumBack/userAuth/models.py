@@ -9,3 +9,5 @@ class User(AbstractUser):
     hash_id = models.CharField(max_length=32, default=helper.create_hash(), unique=True)
     fullname = models.CharField(max_length=50, unique=False)
     imageURL = models.CharField(max_length=150, unique=False, default='')
+    metersWalked = models.IntegerField(default=0)
+    adsPrefered = models.FloatField(default=0.5)
