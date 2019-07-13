@@ -115,3 +115,12 @@ def get_sn_data(request):
     login(request, user)
     serializer = serializers.UserSerializer(user)
     return JsonResponse(serializer.data)
+
+@csrf_exempt
+def change_ads_prefered(request):
+    user = request.user
+    if user.is_authenticated:
+        user.adsPrefered = request.POST['ads_prefered']
+        user.save()
+        return HttpResponse(status=200)
+    return HttpResponse(status=401)
