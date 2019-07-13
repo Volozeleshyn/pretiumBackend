@@ -27,6 +27,5 @@ urlpatterns = [
     path('signup', views.signup),
     path('change_password', views.change_password),
     path('check_id', views.check_id),
-    path('get_sn_data', views.get_sn_data),
-    path('get_friends', views.get_friends)
+    path('get_sn_data', views.get_sn_data)
 ]

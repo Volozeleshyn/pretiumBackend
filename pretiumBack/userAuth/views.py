@@ -109,7 +109,7 @@ def get_sn_data(request):
     if models.User.objects.filter(username=username).exists():
         return HttpResponse(status=401)
     user = models.User(username=request.POST['username'], email=request.POST['email'],
-                       fullname=request.POST['fullname'], hash_id=request.POST['id'])
+                       fullname=request.POST['fullname'], hash_id=request.POST['id'], imageURL=request.POST['imageURL'])
     user.set_password(helper.caesar_cypher(request.POST['id']))
     user.save()
     login(request, user)
