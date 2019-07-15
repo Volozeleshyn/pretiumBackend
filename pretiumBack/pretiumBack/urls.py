@@ -16,17 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from userAuth import views
+import friends.views
+import userAuth.views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/email', views.auth_login_email),
-    path('login/username', views.auth_login_username),
-    path('logout', views.auth_logout),
-    path('signup', views.signup),
-    path('change_password', views.change_password),
-    path('check_id', views.check_id),
-    path('get_sn_data', views.get_sn_data),
-    path('change_ads_prefered', views.change_ads_prefered)
+    path('login/email', userAuth.views.auth_login_email),
+    path('login/username', userAuth.views.auth_login_username),
+    path('logout', userAuth.views.auth_logout),
+    path('signup', userAuth.views.signup),
+    path('change_password', userAuth.views.change_password),
+    path('check_id', userAuth.views.check_id),
+    path('get_sn_data', userAuth.views.get_sn_data),
+    path('change_ads_prefered', userAuth.views.change_ads_prefered),
+    path('get_friends', friends.views.get_friends),
 ]
